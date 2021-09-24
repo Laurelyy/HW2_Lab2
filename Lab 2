@@ -1,0 +1,74 @@
+#Name:Lauren Done
+#Title: Lab 2
+
+#Goal: Look at which workers, with different college majors, are in industries that turned out to be at high risk for unemployment due to COVID.
+
+attach(acs2017_ny)
+
+#first change the factor back to a number
+acs2017_ny$IND_number <- as.numeric(levels(acs2017_ny$IND))[acs2017_ny$IND]
+
+#then pick certain ranges of numberers -- the retail sector, arts, entertainment, accommodation and restaurants.
+acs2017_ny$Covid_risk <- ((acs2017_ny$IND_number > 4600) & acs2017_ny$IND_number < 6000) | ((acs2017_ny$IND_number > 8500) & (acs2017_ny$IND_number < 8700))
+
+#create a dummy variable for Business majors that are Hispanic
+Bus_His <- acs2017_ny$educ_college[(DEGFIELD == "Business")&(HISPAN)]
+
+#create a dummy variable for Fine Arts majors that are Hispanic
+FineA_His <- acs2017_ny$educ_college[(DEGFIELD == "Fine Arts")&(HISPAN)]
+
+length(Bus_FineA)
+#There are 225 Hispanic Fine Arts majors
+
+length(Bus_His)
+#There are 808 Hispanic Business majors
+
+#Create a variable for Hispanic Business majors that are working in industries affected by COVID
+Affected_Bus_His2 <- (acs2017_ny$DEGFIELD == "Business" & acs2017_ny$HISPAN & acs2017_ny$Covid_risk == TRUE)
+summary(Affected_Bus_His2)
+#Out of all 808 Hispanic Business majors, 124 work in industries that were at high risk to be interrupted by COVID.
+124/808
+#About 15% of Hispanic employees working in the Business sector were affected by COVID.
+#Create a variable for Hispanic Fine Arts majors that are working in industries affected by COVID.
+Affected_FineA_His2 <- (acs2017_ny$DEGFIELD == "Fine Arts" & acs2017_ny$Covid_risk == 1 & acs2017_ny$HISPAN)
+summary(Affected_FineA_His2)
+#Out of all 225 Hispanic Fine Arts majors, 57 work in industries that were at high risk to be interrupted by COVID.
+57/225
+#About 25% of Hispanic employees working in the Fine Arts sector were affected by COVID.
+
+
+#Next, I'd like to see if the majority of those individuals affected in the Business Sector identified as male, female or other.
+Affected_Bus_His_Female <- acs2017_ny$female [ ( acs2017_ny$DEGFIELD == "Business" & acs2017_ny$Covid_risk & acs2017_ny$HISPAN)]
+length(which(Affected_Bus_His_Female == TRUE))
+length(which(Affected_Bus_His_Female == FALSE))
+
+#In the business sector, 78 females and 46 males were affected by COVID.
+
+
+#Likewise, for the fine arts, I'd like to see if the majority of those individuals affected in the Fine Arts sector identified as male, female or other.
+Affected_FineA_His_Female <- acs2017_ny$female [ ( acs2017_ny$DEGFIELD == "Fine Arts" & acs2017_ny$Covid_risk & acs2017_ny$HISPAN)]
+length(which(Affected_FineA_His_Female == TRUE))
+length(which(Affected_FineA_His_Female == FALSE))
+
+#In the fine arts sector, 37 females and 20 males were affected by COVID.
+
+#I would like to look into why Hispanic females were disproportionately affected in both sectors.
+
+#That said, I'd like to hypothesize that a majority of women who were affected by COVID in these sectors where affected the lack of childcare. I'd also like to see what proportion of men also shared this burden.
+
+#To start, I would like to look at the proportion of negatively affected individuals of both genders working that have at least 1 child and whose martial status is one of the following: 	Married(spouse absent),	Separated, Widowed, Divorced or Never married/single
+
+#I'll start by creating a new variable for women and men affected by COVID, with degrees in Fine Arts or Business, who have at least 1 child and who is not together with their spouse or partner.
+
+Affected_Parent_Female_Bus <- Affected_Bus_His_Female [ (acs2017_ny$MARST == 2 | 3 | 4 | 5 | 6 & acs2017_ny$NCHILD >= 1)]
+length(which(Affected_Parent_Female_Bus==1))
+length(which(Affected_Parent_Female_Bus==0))
+#All of the Hispanic females and males working within the business sector and that were affected by COVID had a marital status in which they were without spousal or partner support while also raising at least 1 child.
+
+Affected_Parent_Female_FineA <- Affected_FineA_His_Female [ (acs2017_ny$MARST == 2 | 3 | 4 | 5 | 6 & acs2017_ny$NCHILD >= 1)]
+length(which(Affected_Parent_Female_FineA==1))
+length(which(Affected_Parent_Female_FineA==0))
+#All of the Hispanic females and males working within the fine arts sector and that were affected by COVID had a marital status in which they were without spousal or partner support while also raising at least 1 child.
+
+
+#Because it seems that both the men and women in these sectors had at least one child and were separated from their spouse or partner in some capacity; I cannot deduce that the cause of the disproportionate effect on women in these industries was influenced solely by issues concerning to childcare. 
